@@ -23,8 +23,6 @@ def btn_webcam_click():
 
 
     def btn_fotograf_cek_click():
-        camera2 = Label(panel)
-        camera2.pack()
         print("fotograf çekildi")
         ret, frame = cap.read()
         frame = cv2.flip(frame, 1)
@@ -63,7 +61,27 @@ def btn_webcam_click():
     show_frame()
 
 def btn_new_person_click():
-    print("yeni kişi a癟覺ld覺")
+    print("yeni kişi menüsü açıldı")
+    for widget in panel.winfo_children():
+        widget.destroy()
+    lbl_ad_soyad = Label(panel, text="Ad Soyad :", anchor='w',
+                         bg='#ecf0f1')
+    lbl_ad_soyad.place(height = 20, width=200, y=20, x=20)
+
+    txt_ad_soyad = Entry(panel)
+    txt_ad_soyad.place(height = 20, width=200, y=20, x=220)
+
+    lbl_numara = Label(panel, text="Numara:", anchor='w',
+                         bg='#ecf0f1')
+    lbl_numara.place(height = 20, width=200, y=60, x=20)
+
+    txt_numara = Entry(panel)
+    txt_numara.place(height = 20, width=200, y=60, x=220)
+    def btn_ekle_click():
+        print("sdff")
+    btn_ekle = Button(panel, command=btn_ekle_click, text="Ekle")
+    btn_ekle.place(height=40, width=200, y=120, x=220)
+
 
 def btn_show_people_click():
     print("ki��i listesi a癟覺ld覺")
