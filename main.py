@@ -84,7 +84,15 @@ def btn_new_person_click():
 
 
 def btn_show_people_click():
-    print("ki��i listesi a癟覺ld覺")
+    for widget in panel.winfo_children():
+        widget.destroy()
+    height = 5
+    width = 5
+    for i in range(height): #Satırı döndürecek
+        for j in range(width): #Satırı Döndürecek
+            hucre = Entry(panel, text="")
+            hucre.grid(row=i, column=j)
+
 
 def btn_quit_click():
     print("ki��i listesi a癟覺ld覺")
