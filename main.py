@@ -42,7 +42,7 @@ def btn_webcam_click():
             #Veritabanına Eklenecek
 
             files = {'image': open('cam.jpg', 'rb')}
-            r = requests.post("http://localhost:3000/yoklamas/", files=files)
+            r = requests.post("http://localhost:3000/inspections/", files=files)
             mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
             for widget in panel.winfo_children():
                 widget.destroy()
@@ -73,23 +73,31 @@ def btn_new_person_click():
     print("yeni kişi menüsü açıldı")
     for widget in panel.winfo_children():
         widget.destroy()
-    lbl_ad_soyad = Label(panel, text="Ad Soyad :", anchor='w',
+    lbl_ad = Label(panel, text="Ad Soyad :", anchor='w',
                          bg='#ecf0f1')
-    lbl_ad_soyad.place(height = 20, width=200, y=20, x=20)
+    lbl_ad.place(height = 20, width=200, y=20, x=20)
 
-    txt_ad_soyad = Entry(panel)
-    txt_ad_soyad.place(height = 20, width=200, y=20, x=220)
+    txt_ad = Entry(panel)
+    txt_ad.place(height = 20, width=200, y=20, x=220)
 
+    lbl_soyad = Label(panel, text="Soyad :", anchor='w',
+                         bg='#ecf0f1')
+    lbl_soyad.place(height = 20, width=200, y=60, x=20)
+
+    txt_soyad = Entry(panel)
+    txt_soyad.place(height = 20, width=200, y=60, x=220)
+    
     lbl_numara = Label(panel, text="Numara:", anchor='w',
                          bg='#ecf0f1')
-    lbl_numara.place(height = 20, width=200, y=60, x=20)
+    lbl_numara.place(height = 20, width=200, y=100, x=20)
 
     txt_numara = Entry(panel)
-    txt_numara.place(height = 20, width=200, y=60, x=220)
+    txt_numara.place(height = 20, width=200, y=100, x=220)
     def btn_ekle_click():
-        ad_soyad = txt_ad_soyad.get()
+        ad = txt_ad.get()
+        soyad = txt_soyad.get()
         numara = txt_numara.get()
-        r = requests.post("http://localhost:3000/users/", data={"name": ad_soyad,"number": numara})
+        r = requests.post("http://localhost:3000/students/", data={"name": ad,"surname":soyad,"number": numara})
         mbox.showinfo("Kişi Eklendi", r.json()['message'])
     btn_ekle = Button(panel, command=btn_ekle_click, text="Ekle")
     btn_ekle.place(height=40, width=200, y=120, x=220)
@@ -98,7 +106,7 @@ def btn_new_person_click():
 def btn_show_people_click():
     for widget in panel.winfo_children():
         widget.destroy()
-    r = requests.get("http://localhost:3000/users/")
+    r = requests.get("http://localhost:3000/students/")
     students = r.json()
     for student in students:
         entryText = StringVar()
@@ -114,7 +122,13 @@ def btn_show_people_click():
         entryText3 = StringVar()
         hucre = Entry(panel, text="", textvariable=entryText3)
         hucre.grid(row=student["id"], column=2)
-        entryText3.set(student["number"])
+        entryText3.set(student["surname"])
+
+
+        entryText4 = StringVar()
+        hucre = Entry(panel, text="", textvariable=entryText4)
+        hucre.grid(row=student["id"], column=3)
+        entryText4.set(student["number"])
 
 
 
