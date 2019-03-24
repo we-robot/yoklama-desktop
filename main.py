@@ -3,6 +3,8 @@
 from tkinter import *
 import cv2
 from PIL import Image, ImageTk
+import requests
+from tkinter import messagebox as mbox
 
 width, height = 600, 300
 cap = cv2.VideoCapture(0)
@@ -27,6 +29,7 @@ def btn_webcam_click():
         ret, frame = cap.read()
         frame = cv2.flip(frame, 1)
         cv2.imwrite('cam.jpg',frame)
+        cap.release()
         for widget in panel.winfo_children():
             widget.destroy()
         camera2 = Label(panel)
@@ -37,7 +40,13 @@ def btn_webcam_click():
 
         def btn_kaydet_click():
             #Veritabanına Eklenecek
-            print("erferf")
+
+            files = {'image': open('cam.jpg', 'rb')}
+            r = requests.post("http://localhost:3000/yoklamas/", files=files)
+            mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
+            for widget in panel.winfo_children():
+                widget.destroy()
+                
 
         btn_kaydet = Button(panel, text="Kaydet", command=btn_kaydet_click)
         btn_kaydet.place(height = 50, width=150, y=380, x=230)
@@ -78,7 +87,10 @@ def btn_new_person_click():
     txt_numara = Entry(panel)
     txt_numara.place(height = 20, width=200, y=60, x=220)
     def btn_ekle_click():
-        print("sdff")
+        ad_soyad = txt_ad_soyad.get()
+        numara = txt_numara.get()
+        r = requests.post("http://localhost:3000/users/", data={"name": ad_soyad,"number": numara})
+        mbox.showinfo("Kişi Eklendi", r.json()['message'])
     btn_ekle = Button(panel, command=btn_ekle_click, text="Ekle")
     btn_ekle.place(height=40, width=200, y=120, x=220)
 
@@ -86,16 +98,29 @@ def btn_new_person_click():
 def btn_show_people_click():
     for widget in panel.winfo_children():
         widget.destroy()
-    height = 5
-    width = 5
-    for i in range(height): #Satırı döndürecek
-        for j in range(width): #Satırı Döndürecek
-            hucre = Entry(panel, text="")
-            hucre.grid(row=i, column=j)
+    r = requests.get("http://localhost:3000/users/")
+    students = r.json()
+    for student in students:
+        entryText = StringVar()
+        hucre = Entry(panel, text="", textvariable=entryText)
+        hucre.grid(row=student["id"], column=0)
+        entryText.set(student["id"])
+
+        entryText2 = StringVar()
+        hucre = Entry(panel, text="", textvariable=entryText2)
+        hucre.grid(row=student["id"], column=1)
+        entryText2.set(student["name"])
+
+        entryText3 = StringVar()
+        hucre = Entry(panel, text="", textvariable=entryText3)
+        hucre.grid(row=student["id"], column=2)
+        entryText3.set(student["number"])
+
+
 
 
 def btn_quit_click():
-    print("ki��i listesi a癟覺ld覺")
+    print("çıkış butonu tıklandı")
 
 btn_webcam = Button(master, text="Yoklama Al", command=btn_webcam_click,
                     compound=LEFT, background='#ecf0f1', relief=FLAT,
@@ -123,11 +148,5 @@ btn_quit.place(x = 20, y = 230, height=50, width=150)
 
 panel = Frame(master, relief=RAISED, borderwidth=1, background='#2980b9')
 panel.place(x = 190, y = 20, height=560, width=610)
-
-
-
-
-
-
 
 mainloop()
