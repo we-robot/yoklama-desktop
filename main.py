@@ -5,11 +5,10 @@ import cv2
 from PIL import Image, ImageTk
 import requests
 from tkinter import messagebox as mbox
+from tkinter.ttk import Combobox
 
 width, height = 600, 300
-cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+number = -1
 
 master = Tk()
 master.minsize(800,600)
@@ -18,13 +17,24 @@ master.configure(background='#3498db')
 
 def btn_webcam_click():
     print("webcamm acildi!")
+
+    cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
     for widget in panel.winfo_children():
         widget.destroy()
     camera = Label(panel)
     camera.pack()
 
+    r = requests.get("http://localhost:3000/lessons/")
+    cmbDersler = Combobox(panel,values=r.json())
+
+    cmbDersler.set("Ders Seçiniz")
+    cmbDersler.place(height=20, width=150, y=300,x=230)
 
     def btn_fotograf_cek_click():
+        number = cmbDersler.current()
         print("fotograf çekildi")
         ret, frame = cap.read()
         frame = cv2.flip(frame, 1)
@@ -42,11 +52,11 @@ def btn_webcam_click():
             #Veritabanına Eklenecek
 
             files = {'image': open('cam.jpg', 'rb')}
-            r = requests.post("http://localhost:3000/inspections/", files=files)
+            r = requests.post("http://localhost:3000/inspections/",{ 'lesson_number': number }, files=files)
             mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
             for widget in panel.winfo_children():
                 widget.destroy()
-                
+
 
         btn_kaydet = Button(panel, text="Kaydet", command=btn_kaydet_click)
         btn_kaydet.place(height = 50, width=150, y=380, x=230)
@@ -86,7 +96,7 @@ def btn_new_person_click():
 
     txt_soyad = Entry(panel)
     txt_soyad.place(height = 20, width=200, y=60, x=220)
-    
+
     lbl_numara = Label(panel, text="Numara:", anchor='w',
                          bg='#ecf0f1')
     lbl_numara.place(height = 20, width=200, y=100, x=20)
