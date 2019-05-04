@@ -172,6 +172,8 @@ def btn_show_yoklama_click():
     global cap
     cap.release()
     cv2.destroyAllWindows()
+    for widget in panel.winfo_children():
+        widget.destroy()
 
     def btn_yoklama_goster_click():
         r = requests.post("http://localhost:3000/inspections/list", data={
