@@ -4,82 +4,101 @@ from tkinter import *
 import cv2
 from PIL import Image, ImageTk
 import requests
+import time
 from tkinter import messagebox as mbox
 from tkinter.ttk import Combobox
+a = 0
+width, height = 800, 600
 
-width, height = 600, 300
+cap = cv2.VideoCapture()
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
 number = -1
-
 master = Tk()
 master.minsize(800,600)
 master.geometry("820x600")
 master.configure(background='#3498db')
 
 def btn_webcam_click():
-    print("webcamm acildi!")
+    global a
+    
+    if(a == 1):
+        print("webcamm acildi!")
+    else:
+        a = 1
+        
+        global cap   
+        cap = cv2.VideoCapture(0)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
-    for widget in panel.winfo_children():
-        widget.destroy()
-    camera = Label(panel)
-    camera.pack()
-
-    r = requests.get("http://localhost:3000/lessons/")
-    cmbDersler = Combobox(panel,values=r.json())
-
-    cmbDersler.set("Ders Seçiniz")
-    cmbDersler.place(height=20, width=150, y=300,x=230)
-
-    def btn_fotograf_cek_click():
-        number = cmbDersler.current()
-        print("fotograf çekildi")
-        ret, frame = cap.read()
-        frame = cv2.flip(frame, 1)
-        cv2.imwrite('cam.jpg',frame)
-        cap.release()
         for widget in panel.winfo_children():
             widget.destroy()
-        camera2 = Label(panel)
-        camera2.pack()
-        image = ImageTk.PhotoImage(Image.open("cam.jpg"))
-        camera2.imgtk = image
-        camera2.configure(image=image)
+        camera = Label(panel)
+        camera.pack()
 
-        def btn_kaydet_click():
-            #Veritabanına Eklenecek
+        r = requests.get("http://localhost:3000/lessons/")
+        cmbDersler = Combobox(panel,values=r.json())
 
-            files = {'image': open('cam.jpg', 'rb')}
-            r = requests.post("http://localhost:3000/inspections/",{ 'lesson_number': number }, files=files)
-            mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
+        cmbDersler.set("Ders Seçiniz")
+        cmbDersler.place(height=20, width=150, y=300,x=230)
+
+        def btn_fotograf_cek_click():
+            number = cmbDersler.current()
+            print("fotograf çekildi")
+            ret, frame = cap.read()
+            frame = cv2.flip(frame, 1)
+            cv2.imwrite('cam.jpg',frame)
+            cap.release()
             for widget in panel.winfo_children():
                 widget.destroy()
+            camera2 = Label(panel)
+            camera2.pack()
+            image = ImageTk.PhotoImage(Image.open("cam.jpg"))
+            camera2.imgtk = image
+            camera2.configure(image=image)
+            global a
+            a = 0
+            def btn_kaydet_click():
+                #Veritabanına Eklenecek
+
+                files = {'image': open('cam.jpg', 'rb')}
+                r = requests.post("http://localhost:3000/inspections/",{ 'lesson_number': number }, files=files)
+                mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
+                for widget in panel.winfo_children():
+                    widget.destroy()
+
+                global a
+                a = 0
+
+            btn_kaydet = Button(panel, text="Kaydet", command=btn_kaydet_click)
+            btn_kaydet.place(height = 50, width=150, y=380, x=230)
 
 
-        btn_kaydet = Button(panel, text="Kaydet", command=btn_kaydet_click)
-        btn_kaydet.place(height = 50, width=150, y=380, x=230)
+        btn_fotograf_cek = Button(panel, text="Yoklama Al", command=btn_fotograf_cek_click)
+        btn_fotograf_cek.place(height = 50, width=150, y=380, x=230)
 
 
-    btn_fotograf_cek = Button(panel, text="Yoklama Al", command=btn_fotograf_cek_click)
-    btn_fotograf_cek.place(height = 50, width=150, y=380, x=230)
+        def show_frame():
 
+            _, frame = cap.read()
+            frame = cv2.flip(frame, 1)
+            cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+            img = Image.fromarray(cv2image)
+            imgtk = ImageTk.PhotoImage(image=img)
+            camera.imgtk = imgtk
+            camera.configure(image=imgtk)
+            camera.after(10, show_frame)
 
-    def show_frame():
-
-        _, frame = cap.read()
-        frame = cv2.flip(frame, 1)
-        cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-        img = Image.fromarray(cv2image)
-        imgtk = ImageTk.PhotoImage(image=img)
-        camera.imgtk = imgtk
-        camera.configure(image=imgtk)
-        camera.after(10, show_frame)
-
-    show_frame()
+        show_frame()
 
 def btn_new_person_click():
+    global a
+    a = 0
+    global cap
+    cap.release()
+    cv2.destroyAllWindows()
     print("yeni kişi menüsü açıldı")
     for widget in panel.winfo_children():
         widget.destroy()
@@ -114,6 +133,11 @@ def btn_new_person_click():
 
 
 def btn_show_people_click():
+    global a
+    a = 0
+    global cap
+    cap.release()
+    cv2.destroyAllWindows()
     for widget in panel.winfo_children():
         widget.destroy()
     r = requests.get("http://localhost:3000/students/")
@@ -141,9 +165,52 @@ def btn_show_people_click():
         entryText4.set(student["number"])
 
 
+def btn_show_yoklama_click():
 
+    global a
+    a = 0
+    global cap
+    cap.release()
+    cv2.destroyAllWindows()
+
+    def btn_yoklama_goster_click():
+        r = requests.post("http://localhost:3000/inspections/list", data={
+            "gun": cmbGun.get(),
+            "ay": cmbAy.get(),
+            "yıl": cmbYil.get(),
+            "ders_id": cmbDersler.current()
+        })
+        mbox.showinfo("Gelem : ", r.json()['message'])
+
+        
+
+    r = requests.get("http://localhost:3000/lessons/")
+    cmbDersler = Combobox(panel,values=r.json())
+    cmbDersler.set("Ders Seçiniz")
+    cmbDersler.place(height=20, width=150, y=20, x=30)
+    
+    cmbGun = Combobox(panel,values=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,25,26,27,28,29,30,31])
+    cmbGun.set("Gün")
+    cmbGun.place(height=20, width=50, y=20, x=210)
+    
+    cmbAy = Combobox(panel,values=[1,2,3,4,5,6,7,8,9,10,11,12])
+    cmbAy.set("Ay")
+    cmbAy.place(height=20, width=50, y=20, x=270)
+
+    cmbYil = Combobox(panel, values=[2018, 2019])
+    cmbYil.set("Yıl")
+    cmbYil.place(height=20, width=50, y=20, x=330)
+
+    btn_göster = Button(panel, command=btn_yoklama_goster_click, text="Göster")
+
+    btn_göster.place(height=20, width=150, y=20, x=400)
 
 def btn_quit_click():
+    global a
+    a = 0
+    global cap
+    cap.release()
+    cv2.destroyAllWindows()
     print("çıkış butonu tıklandı")
 
 btn_webcam = Button(master, text="Yoklama Al", command=btn_webcam_click,
@@ -165,10 +232,17 @@ btn_show_people = Button(master, text="Kişi Listesi", command=btn_show_people_c
 btn_show_people.place(x = 20, y = 160, height=50, width=150)
 
 
+
+btn_show_yoklama = Button(master, text="Yoklama", command=btn_show_yoklama_click,
+                         compound=LEFT, background='#ecf0f1', relief=FLAT,
+                         cursor="hand1", activebackground='#3498db')
+btn_show_yoklama.place(x = 20, y = 230, height=50, width=150)
+
+
 btn_quit = Button(master, text="Çıkış", command=btn_quit_click, cursor="hand1",
                   compound=LEFT, background='#ecf0f1', relief=FLAT,
                   activebackground='#3498db')
-btn_quit.place(x = 20, y = 230, height=50, width=150)
+btn_quit.place(x = 20, y = 300, height=50, width=150)
 
 panel = Frame(master, relief=RAISED, borderwidth=1, background='#2980b9')
 panel.place(x = 190, y = 20, height=560, width=610)
