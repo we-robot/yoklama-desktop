@@ -179,7 +179,7 @@ def btn_show_yoklama_click():
         r = requests.post("http://localhost:3000/inspections/list", data={
             "gun": cmbGun.get(),
             "ay": cmbAy.get(),
-            "yıl": cmbYil.get(),
+            "yil": cmbYil.get(),
             "ders_id": cmbDersler.current()
         })
         mbox.showinfo("Gelem : ", r.json()['message'])
