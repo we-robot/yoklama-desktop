@@ -102,7 +102,20 @@ def btn_new_person_click():
     print("yeni kişi menüsü açıldı")
     for widget in panel.winfo_children():
         widget.destroy()
-    lbl_ad = Label(panel, text="Ad Soyad :", anchor='w',
+
+    lbl_ad = Label(panel, text="Aldığı Dersler :", anchor='w',
+                         bg='#ecf0f1')
+    lbl_ad.place(height = 20, width=200, y=140, x=20)
+        
+    r = requests.get("http://localhost:3000/lessons/")
+    l = Listbox(panel, selectmode= EXTENDED)
+    values = r.json()
+    for value in values:
+        l.insert(END, value)
+        
+    l.place(height = 200,width = 200, y = 140, x = 220)
+
+    lbl_ad = Label(panel, text="Ad :", anchor='w',
                          bg='#ecf0f1')
     lbl_ad.place(height = 20, width=200, y=20, x=20)
 
@@ -123,13 +136,16 @@ def btn_new_person_click():
     txt_numara = Entry(panel)
     txt_numara.place(height = 20, width=200, y=100, x=220)
     def btn_ekle_click():
+        items = l.curselection()
+        mbox.showinfo("helo", items)
         ad = txt_ad.get()
         soyad = txt_soyad.get()
         numara = txt_numara.get()
-        r = requests.post("http://localhost:3000/students/", data={"name": ad,"surname":soyad,"number": numara})
+        dersler = ((str(e) + " ") for e in items)
+        r = requests.post("http://localhost:3000/students/", data={"name": ad,"surname":soyad,"number": numara, "lessons": "".join(dersler)})
         mbox.showinfo("Kişi Eklendi", r.json()['message'])
     btn_ekle = Button(panel, command=btn_ekle_click, text="Ekle")
-    btn_ekle.place(height=40, width=200, y=120, x=220)
+    btn_ekle.place(height=40, width=200, y=360, x=220)
 
 
 def btn_show_people_click():
