@@ -190,7 +190,8 @@ def btn_show_yoklama_click():
     cv2.destroyAllWindows()
     for widget in panel.winfo_children():
         widget.destroy()
-
+    panel2 = Frame(panel, relief=RAISED)
+    panel2.place(x = 20, y = 60)
     def btn_yoklama_goster_click():
         r = requests.post("http://localhost:3000/inspections/list", data={
             "gun": cmbGun.get(),
@@ -198,8 +199,25 @@ def btn_show_yoklama_click():
             "yil": cmbYil.get(),
             "ders_id": cmbDersler.current()
         })
-        mbox.showinfo("Gelem : ", r.json()['message'])
+        
 
+        for widget in panel2.winfo_children():
+            widget.destroy()
+        students = r.json()['message']
+        sayac2 = 0
+        
+        for student in students:
+            sayac2 += 1
+            entryText3 = StringVar()
+            hucre = Entry(panel2, text="", textvariable=entryText3)
+            hucre.grid(row=sayac2, column=1)
+            entryText3.set(student["name"])
+
+
+            entryText4 = StringVar()
+            hucre = Entry(panel2, text="", textvariable=entryText4)
+            hucre.grid(row=sayac2, column=2)
+            entryText4.set(str(student["number"]))
         
 
     r = requests.get("http://localhost:3000/lessons/")
