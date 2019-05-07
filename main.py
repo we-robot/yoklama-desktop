@@ -42,42 +42,48 @@ def btn_webcam_click():
         cmbDersler = Combobox(panel,values=r.json())
 
         cmbDersler.set("Ders Seçiniz")
-        cmbDersler.place(height=20, width=150, y=300,x=230)
+        cmbDersler.place(height=20, width=150, y=400,x=230)
 
         def btn_fotograf_cek_click():
             number = cmbDersler.current()
-            print("fotograf çekildi")
-            ret, frame = cap.read()
-            frame = cv2.flip(frame, 1)
-            cv2.imwrite('cam.jpg',frame)
-            cap.release()
-            for widget in panel.winfo_children():
-                widget.destroy()
-            camera2 = Label(panel)
-            camera2.pack()
-            image = ImageTk.PhotoImage(Image.open("cam.jpg"))
-            camera2.imgtk = image
-            camera2.configure(image=image)
-            global a
-            a = 0
-            def btn_kaydet_click():
-                #Veritabanına Eklenecek
+            if number == -1:
+                mbox.showinfo("Hata", "Ders Secmediniz")
 
-                files = {'image': open('cam.jpg', 'rb')}
-                r = requests.post("http://localhost:3000/inspections/",{ 'lesson_number': number }, files=files)
-                mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
+            else:
+                print("fotograf çekildi")
+                ret, frame = cap.read()
+                frame = cv2.flip(frame, 1)
+                cv2.imwrite('cam.jpg',frame)
+                cap.release()
                 for widget in panel.winfo_children():
                     widget.destroy()
-
+                camera2 = Label(panel)
+                camera2.pack()
+                image = ImageTk.PhotoImage(Image.open("cam.jpg"))
+                camera2.imgtk = image
+                camera2.configure(image=image)
                 global a
                 a = 0
+                def btn_kaydet_click():
 
-            btn_kaydet = Button(panel, text="Kaydet", command=btn_kaydet_click)
-            btn_kaydet.place(height = 50, width=150, y=380, x=230)
+                    # mbox.showinfo("Hata", "Ders Secmediniz"+number)
+                    #Veritabanına Eklenecek
+                    
+                    files = {'image': open('cam.jpg', 'rb')}
+                    r = requests.post("http://localhost:3000/inspections/",{ 'lesson_number': number }, files=files)
+                    mbox.showinfo("Yoklama Gönderildi", r.json()['message'])
+                    for widget in panel.winfo_children():
+                        widget.destroy()
+
+                    global a
+                    a = 0
+
+                btn_kaydet = Button(panel, text="Kaydet", command=btn_kaydet_click)
+                btn_kaydet.place(height = 50, width=150, y=400, x=230)
 
 
         btn_fotograf_cek = Button(panel, text="Yoklama Al", command=btn_fotograf_cek_click)
-        btn_fotograf_cek.place(height = 50, width=150, y=380, x=230)
+        btn_fotograf_cek.place(height = 50, width=150, y=430, x=230)
 
 
         def show_frame():
@@ -137,7 +143,6 @@ def btn_new_person_click():
     txt_numara.place(height = 20, width=200, y=100, x=220)
     def btn_ekle_click():
         items = l.curselection()
-        mbox.showinfo("helo", items)
         ad = txt_ad.get()
         soyad = txt_soyad.get()
         numara = txt_numara.get()
